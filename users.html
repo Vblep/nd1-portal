@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Users</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .user-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .user-card {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      width: 150px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .user-card img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .user-card a {
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+      display: block;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>All Users</h1>
+  <div class="user-list" id="userList"></div>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460",
+      measurementId: "G-RB3BCSZ5VM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const userList = document.getElementById("userList");
+
+    async function loadUsers() {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "user-card";
+        div.innerHTML = `
+          <img src="${data.photo || 'default.jpg'}" alt="Profile">
+          <a href="view-profile.html?uid=${docSnap.id}">${data.username || 'No Name'}</a>
+        `;
+        userList.appendChild(div);
+      });
+    }
+
+    loadUsers();
+  </script></body>
+</html>

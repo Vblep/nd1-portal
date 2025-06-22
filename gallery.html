@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>School Gallery</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f7f7f7; transition: background 0.3s, color 0.3s; }
+    .dark-mode body { background: #121212; color: #eee; }
+    .card { background: white; border-radius: 10px; padding: 1em; margin-bottom: 1em; box-shadow: 0 0 5px #ccc; cursor: pointer; }
+    .dark-mode .card { background: #1e1e1e; box-shadow: 0 0 5px #444; }
+    .post-meta { font-size: 0.9em; color: gray; display: flex; align-items: center; gap: 8px; }
+    .summary { font-size: 0.85em; color: #444; margin-top: 0.5em; }
+    .dark-mode .summary, .dark-mode .post-meta { color: #bbb; }
+    .comment-box { margin-top: 1em; padding-top: 0.5em; border-top: 1px solid #eee; }
+    .comment { font-size: 0.9em; margin: 0.4em 0; }
+    .comment-actions { font-size: 0.8em; color: blue; cursor: pointer; margin-left: 0.5em; display: inline-block; }
+    .reply-input { margin-top: 0.3em; }
+    #notificationBell { position: fixed; top: 10px; right: 50px; cursor: pointer; font-size: 24px; }
+    #darkToggle { position: fixed; top: 10px; right: 10px; cursor: pointer; font-size: 24px; }
+  </style>
+</head>
+<body>
+
+<h2>📸 School Gallery</h2>
+<div id="notificationBell">🔔</div>
+<div id="darkToggle">🌙</div>
+<div id="status">Checking auth...</div>
+
+<form id="uploadForm" style="display: none;">
+  <input type="file" id="photoFile" required />
+  <input type="text" id="caption" placeholder="Enter caption..." required />
+  <button type="submit">Upload</button>
+</form>
+
+<div id="galleryContainer">Loading gallery...</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+  authDomain: "nd1portal.firebaseapp.com",
+  projectId: "nd1portal",
+  storageBucket: "nd1portal.appspot.com",
+  messagingSenderId: "428976722721",
+  appId: "1:428976722721:web:d15b86d70275ae30dda460"
+};
+
+const imgbbKey = "88130daf8daf8e9d13508358ba9da175";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+
+const form = document.getElementById("uploadForm");
+const status = document.getElementById("status");
+const gallery = document.getElementById("galleryContainer");
+let currentUser;
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    status.textContent = "Please log in to use the gallery.";
+    return;
+  }
+  currentUser = user;
+  status.textContent = `Welcome, ${user.email}`;
+  form.style.display = "block";
+  loadGallery();
+});
+
+document.getElementById("darkToggle").onclick = () => {
+  document.body.classList.toggle("dark-mode");
+};
+
+form.onsubmit = async (e) => {
+  e.preventDefault();
+  const file = document.getElementById("photoFile").files[0];
+  const caption = document.getElementById("caption").value.trim();
+  if (!file || !caption) return alert("Please provide a photo and caption.");
+  status.textContent = "Uploading...";
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const base64 = reader.result.split(",")[1];
+    const body = new URLSearchParams();
+    body.append("image", base64);
+    try {
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, { method: "POST", body });
+      const data = await res.json();
+      if (data.success) {
+        await addDoc(collection(db, "pendingUploads"), {
+          url: data.data.url,
+          caption,
+          uploader: currentUser.uid,
+          likes: [],
+          dislikes: [],
+          comments: [],
+          timestamp: Date.now()
+        });
+        status.textContent = "✅ Uploaded for approval";
+        form.reset();
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (err) {
+      console.error(err);
+      status.textContent = "❌ Upload failed";
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+async function loadGallery() {
+  try {
+    gallery.innerHTML = "<p>Loading gallery...</p>";
+    const q = query(collection(db, "approvedUploads"), orderBy("timestamp", "desc"));
+    const snap = await getDocs(q);
+    gallery.innerHTML = "";
+
+    if (snap.empty) {
+      gallery.innerHTML = "<p>No posts yet.</p>";
+      return;
+    }
+
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const id = docSnap.id;
+
+      let profile = {};
+      try {
+        const userSnap = await getDoc(doc(db, "users", data.uploader));
+        if (userSnap.exists()) profile = userSnap.data();
+      } catch (e) {
+        console.warn("Profile fetch failed", data.uploader);
+      }
+
+      const username = profile.username || "Unknown User";
+      const photo = profile.photo || "https://i.imgur.com/placeholder-profile.png";
+      const comments = data.comments || [];
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.id = id;
+
+      card.innerHTML = `
+        <img src="${data.url}" alt="Photo" style="width: 100%; border-radius: 10px;">
+        <p><strong>${data.caption}</strong></p>
+        <div class="post-meta">
+          <img src="${photo}" style="width: 25px; height: 25px; border-radius: 50%;">
+          <a href="view-profile.html?uid=${data.uploader}" style="text-decoration: none; color: gray;">${username}</a> |
+          🕒 ${new Date(data.timestamp).toLocaleString()}
+        </div>
+        <div class="summary">
+          ❤️ ${data.likes?.length || 0} |
+          👎 ${data.dislikes?.length || 0} |
+          💬 ${comments.length}
+        </div>
+        ${currentUser.email === "ebuvick0@gmail.com" ? `<button onclick="deletePost('${id}')">🗑️ Delete</button>` : ""}
+      `;
+
+      let tapTimer;
+      card.addEventListener("click", () => {
+        if (tapTimer) {
+          likePost(id);
+          clearTimeout(tapTimer);
+          tapTimer = null;
+        } else {
+          tapTimer = setTimeout(() => {
+            window.location.href = `post.html?id=${id}`;
+            tapTimer = null;
+          }, 300);
+        }
+      });
+
+      gallery.appendChild(card);
+    }
+  } catch (err) {
+    gallery.innerHTML = "<p style='color: red;'>Error loading gallery</p>";
+    console.error("Gallery error:", err);
+  }
+}
+
+async function likePost(id) {
+  const ref = doc(db, "approvedUploads", id);
+  const snap = await getDoc(ref);
+  const post = snap.data();
+  if (!post.likes.includes(currentUser.email)) {
+    post.likes.push(currentUser.email);
+    await updateDoc(ref, { likes: post.likes });
+    loadGallery();
+  }
+}
+
+window.deletePost = async function (id) {
+  if (!confirm("Delete this post?")) return;
+  await deleteDoc(doc(db, "approvedUploads", id));
+  loadGallery();
+};
+</script>
+
+</body>
+</html>

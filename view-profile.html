@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .profile-container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #007bff;
+    }
+    .username {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .info {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #555;
+    }
+    #editBtn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <img id="profilePic" class="profile-pic" src="" alt="Profile Picture">
+    <div class="username" id="username">Username</div>
+    <div class="info" id="email"></div>
+    <div class="info" id="bio"></div>
+    <div class="info" id="age"></div>
+    <div class="info" id="sex"></div>
+    <div class="info" id="phone"></div>
+    <button id="editBtn" onclick="location.href='profile.html'">Edit Profile</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460",
+      measurementId: "G-RB3BCSZ5VM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const viewUid = params.get('uid');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return window.location.href = "auth.html";
+
+      const targetUid = viewUid || user.uid;
+      if (targetUid === user.uid) document.getElementById("editBtn").style.display = "inline-block";
+
+      const userDoc = await getDoc(doc(db, "users", targetUid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        document.getElementById("profilePic").src = data.photo || "default.jpg";
+        document.getElementById("username").innerText = data.username || "No Username";
+        document.getElementById("email").innerText = `Email: ${data.email || ''}`;
+        document.getElementById("bio").innerText = `Bio: ${data.bio || ''}`;
+        document.getElementById("age").innerText = `Age: ${data.age || ''}`;
+        document.getElementById("sex").innerText = `Sex: ${data.sex || ''}`;
+        document.getElementById("phone").innerText = `Phone: ${data.phone || ''}`;
+      } else {
+        alert("Profile not found.");
+      }
+    });
+  </script>
+</body>
+</html>

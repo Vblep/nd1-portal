@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ND1 Student Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to right, #004080, #0066cc);
+      color: #fff;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    h2 {
+      margin-bottom: 30px;
+    }
+    .form-box {
+      background: #fff;
+      color: #000;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    input {
+      display: block;
+      width: 100%;
+      margin: 12px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #004080;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #003060;
+    }
+    .link {
+      margin-top: 15px;
+    }
+    .link a {
+      color: #004080;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>ND1 Student Registration</h2>
+  <div class="form-box">
+    <input type="text" id="matric" placeholder="Matric Number" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="register()">Create Account</button>
+    <div class="link">
+      Already registered? <a href="login.html">Login here</a>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460",
+      measurementId: "G-RB3BCSZ5VM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.register = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const matric = document.getElementById("matric").value;
+
+      if (!email || !password || !matric) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        alert("Registration successful. Please log in.");
+        window.location.href = "login.html";
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    };
+  </script>
+</body>
+</html>

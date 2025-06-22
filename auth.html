@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ND1 Portal - Login or Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #004080, #007acc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      color: #004080;
+    }
+    .tab-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .tab-buttons button {
+      flex: 1;
+      padding: 10px;
+      cursor: pointer;
+      background-color: #eee;
+      border: none;
+      font-weight: bold;
+    }
+    .tab-buttons button.active {
+      background-color: #004080;
+      color: white;
+    }
+    form {
+      display: none;
+    }
+    form.active {
+      display: block;
+    }
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .password-wrapper {
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+    button[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .forgot {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    .forgot a {
+      color: #007acc;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ND1 Portal</h2>
+    <div class="tab-buttons">
+      <button id="loginTab" class="active" onclick="switchTab('login')">Login</button>
+      <button id="registerTab" onclick="switchTab('register')">Register</button>
+    </div>
+    <form id="loginForm" class="active">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <div class="password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <span class="toggle-password" onclick="togglePassword('loginPassword')">👁️</span>
+      </div>
+      <div class="forgot"><a href="#" onclick="resetPassword()">Forgot Password?</a></div>
+      <div class="error" id="loginError"></div>
+      <button type="submit">Login</button>
+    </form>
+    <form id="registerForm">
+      <input type="email" id="registerEmail" placeholder="Email" required>
+      <div class="password-wrapper">
+        <input type="password" id="registerPassword" placeholder="Password" required>
+        <span class="toggle-password" onclick="togglePassword('registerPassword')">👁️</span>
+      </div>
+      <div class="error" id="registerError"></div>
+      <button type="submit">Register</button>
+    </form>
+  </div>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460",
+      measurementId: "G-RB3BCSZ5VM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html";
+      } catch (error) {
+        document.getElementById("loginError").textContent = error.message;
+      }
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("registerEmail").value;
+      const password = document.getElementById("registerPassword").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        window.location.href = "username.html";
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          document.getElementById("registerError").textContent = "Email already registered. Please login.";
+        } else {
+          document.getElementById("registerError").textContent = error.message;
+        }
+      }
+    });
+
+    window.resetPassword = async () => {
+      const email = prompt("Enter your email to reset password:");
+      if (email) {
+        try {
+          await sendPasswordResetEmail(auth, email);
+          alert("Password reset email sent!");
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      }
+    };
+
+    window.switchTab = (tab) => {
+      document.getElementById("loginForm").classList.remove("active");
+      document.getElementById("registerForm").classList.remove("active");
+      document.getElementById("loginTab").classList.remove("active");
+      document.getElementById("registerTab").classList.remove("active");
+
+      if (tab === "login") {
+        document.getElementById("loginForm").classList.add("active");
+        document.getElementById("loginTab").classList.add("active");
+      } else {
+        document.getElementById("registerForm").classList.add("active");
+        document.getElementById("registerTab").classList.add("active");
+      }
+    };
+
+    window.togglePassword = (id) => {
+      const input = document.getElementById(id);
+      input.type = input.type === "password" ? "text" : "password";
+    };
+  </script></body>
+</html>

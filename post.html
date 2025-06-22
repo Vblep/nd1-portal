@@ -1,0 +1,143 @@
+<!DOCTYPE html><html>
+<head>
+  <title>View Post</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f7f7f7; }
+    .card { background: white; border-radius: 10px; padding: 1em; margin-bottom: 1em; box-shadow: 0 0 5px #ccc; }
+    .post-meta { font-size: 0.9em; color: gray; }
+    .comment-box { margin-top: 1em; border-top: 1px solid #eee; padding-top: 1em; }
+    .comment { font-size: 0.9em; margin: 0.4em 0; }
+    .comment-actions { font-size: 0.8em; color: blue; cursor: pointer; margin-left: 0.5em; display: inline-block; }
+    .reply-input { margin-top: 0.3em; }
+    .reply-btn { color: blue; cursor: pointer; font-size: 0.8em; }
+  </style>
+</head>
+<body>
+  <div id="status">Loading post...</div>
+  <div id="postContainer"></div><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+  authDomain: "nd1portal.firebaseapp.com",
+  projectId: "nd1portal",
+  storageBucket: "nd1portal.appspot.com",
+  messagingSenderId: "428976722721",
+  appId: "1:428976722721:web:d15b86d70275ae30dda460"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+
+const urlParams = new URLSearchParams(window.location.search);
+const postId = urlParams.get("id");
+const postContainer = document.getElementById("postContainer");
+let currentUser;
+
+onAuthStateChanged(auth, async user => {
+  if (!user) return document.getElementById("status").textContent = "Please login to view post.";
+  currentUser = user;
+  const ref = doc(db, "approvedUploads", postId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return postContainer.innerHTML = "<p>Post not found.</p>";
+
+  const data = snap.data();
+  const comments = data.comments || [];
+  document.getElementById("status").textContent = "";
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <img src="${data.url}" style="width: 100%; border-radius: 10px;">
+    <p><strong>${data.caption}</strong></p>
+    <p class="post-meta">${data.uploader} | ${new Date(data.timestamp).toLocaleString()}</p>
+    <p>❤️ ${data.likes?.length || 0} | 👎 ${data.dislikes?.length || 0} | 💬 ${comments.length}</p>
+    <button onclick="likePost()">❤️ Like</button>
+    <div class="comment-box">
+      ${comments.map((c, i) => `
+        <div class="comment">
+          ${c.text}
+          <span class="comment-actions" onclick="likeComment(${i})">👍</span>
+          <span class="comment-actions" onclick="dislikeComment(${i})">👎</span>
+          <span class="reply-btn" onclick="toggleReply(${i})">Reply</span>
+          <div class="reply-input" id="reply-input-${i}" style="display: none;">
+            <input type="text" id="reply-${i}" placeholder="Reply...">
+            <button onclick="replyToComment(${i})">Send</button>
+          </div>
+        </div>
+      `).join("")}
+      <input type="text" id="commentInput" placeholder="Write a comment...">
+      <button onclick="addComment()">📩</button>
+    </div>
+  `;
+
+  postContainer.appendChild(card);
+});
+
+window.likePost = async function () {
+  const ref = doc(db, "approvedUploads", postId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  if (!data.likes.includes(currentUser.email)) {
+    data.likes.push(currentUser.email);
+    await updateDoc(ref, { likes: data.likes });
+    location.reload();
+  }
+};
+
+window.addComment = async function () {
+  const input = document.getElementById("commentInput");
+  const text = input.value.trim();
+  if (!text) return;
+  const ref = doc(db, "approvedUploads", postId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  data.comments.push({ text, time: Date.now(), likes: [], dislikes: [], replies: [] });
+  await updateDoc(ref, { comments: data.comments });
+  input.value = "";
+  location.reload();
+};
+
+window.likeComment = async function (index) {
+  const ref = doc(db, "approvedUploads", postId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  data.comments[index].likes.push(currentUser.email);
+  await updateDoc(ref, { comments: data.comments });
+  location.reload();
+};
+
+window.dislikeComment = async function (index) {
+  const ref = doc(db, "approvedUploads", postId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  data.comments[index].dislikes.push(currentUser.email);
+  await updateDoc(ref, { comments: data.comments });
+  location.reload();
+};
+
+window.toggleReply = function (index) {
+  const box = document.getElementById(`reply-input-${index}`);
+  box.style.display = box.style.display === "none" ? "block" : "none";
+};
+
+window.replyToComment = async function (index) {
+  const input = document.getElementById(`reply-${index}`);
+  const replyText = input.value.trim();
+  if (!replyText) return;
+  const ref = doc(db, "approvedUploads", postId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const replies = data.comments[index].replies || [];
+  replies.push({ text: replyText, time: Date.now() });
+  data.comments[index].replies = replies;
+  await updateDoc(ref, { comments: data.comments });
+  location.reload();
+};
+</script></body>
+</html>

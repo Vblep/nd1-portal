@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit My Profile</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 2em; }
+    .profile-container { max-width: 500px; margin: auto; background: white; padding: 2em; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    h2 { text-align: center; }
+    input, textarea, select, button { width: 100%; padding: 0.7em; margin: 0.5em 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { background: #007bff; color: white; cursor: pointer; }
+    #preview img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<div class="profile-container">
+  <h2>👤 Edit My Profile</h2>
+  <div id="preview"></div>
+  <form id="profileForm">
+    <input type="file" id="photo" accept="image/*" />
+    <input type="text" id="username" placeholder="Preferred username" required />
+    <input type="number" id="age" placeholder="Age" required />
+    <select id="sex" required>
+      <option value="">Select Sex</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="tel" id="phone" placeholder="Phone number" required />
+    <textarea id="bio" placeholder="Short bio..." required></textarea>
+    <button type="submit">💾 Save Profile</button>
+  </form>
+  <p id="status"></p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+  authDomain: "nd1portal.firebaseapp.com",
+  projectId: "nd1portal",
+  storageBucket: "nd1portal.appspot.com",
+  messagingSenderId: "428976722721",
+  appId: "1:428976722721:web:d15b86d70275ae30dda460"
+};
+
+const imgbbKey = "88130daf8daf8e9d13508358ba9da175";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+
+const form = document.getElementById("profileForm");
+const statusText = document.getElementById("status");
+const preview = document.getElementById("preview");
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    statusText.textContent = "Please log in to update your profile.";
+    form.style.display = "none";
+    return;
+  }
+
+  currentUser = user;
+
+  const docRef = doc(db, "users", currentUser.uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    if (data.photo) preview.innerHTML = `<img src="${data.photo}" />`;
+    document.getElementById("username").value = data.username || "";
+    document.getElementById("age").value = data.age || "";
+    document.getElementById("sex").value = data.sex || "";
+    document.getElementById("phone").value = data.phone || "";
+    document.getElementById("bio").value = data.bio || "";
+  }
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    statusText.textContent = "Saving...";
+    const file = document.getElementById("photo").files[0];
+    const username = document.getElementById("username").value.trim();
+    const age = document.getElementById("age").value.trim();
+    const sex = document.getElementById("sex").value;
+    const phone = document.getElementById("phone").value.trim();
+    const bio = document.getElementById("bio").value.trim();
+
+    let photoURL = docSnap.exists() ? docSnap.data().photo || "" : "";
+
+    if (file) {
+      const base64 = await toBase64(file);
+      const body = new URLSearchParams();
+      body.append("image", base64);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+        method: "POST",
+        body
+      });
+      const result = await res.json();
+      if (result.success) {
+        photoURL = result.data.url;
+        preview.innerHTML = `<img src="${photoURL}" />`;
+      } else {
+        statusText.textContent = "Image upload failed.";
+        return;
+      }
+    }
+
+    await setDoc(docRef, {
+      email: currentUser.email,
+      photo: photoURL,
+      username,
+      age,
+      sex,
+      phone,
+      bio
+    });
+
+    statusText.textContent = "✅ Profile saved! Redirecting...";
+    setTimeout(() => {
+      window.location.href = "view-profile.html";
+    }, 1500);
+  };
+});
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+</script>
+</body>
+</html>

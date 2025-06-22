@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ND1 Computer Science Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding-top: 80px;
+      background: url('220px-FEDERAL_POLYTECHNIC_NEKEDE_OWERRI_front_gate-3273502588.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }.dark-mode {
+  background-color: #121212;
+  color: white;
+}
+
+nav {
+  position: fixed; top: 0; left: 0; width: 100%;
+  background-color: #004080;
+  padding: 15px 0;
+  text-align: center;
+  z-index: 1000;
+}
+
+nav a {
+  color: white;
+  margin: 0 20px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+.dark-mode nav {
+  background-color: #222;
+}
+
+.container {
+  background: rgba(255,255,255,0.92);
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+h1, h2 {
+  color: #004080;
+}
+
+#search {
+  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin: 10px auto 20px;
+  display: block;
+}
+
+.notice {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
+
+.dark-mode .container {
+  background: rgba(20,20,20,0.9);
+}
+
+.dark-mode .notice {
+  background-color: #333;
+  color: white;
+  border-color: #555;
+}
+
+.toggle-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: white;
+  color: #004080;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.dark-mode .toggle-btn {
+  background: #444;
+  color: white;
+}
+
+.collapsible {
+  background-color: #e0e0e0;
+  color: #004080;
+  cursor: pointer;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 16px;
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.content {
+  padding: 0 15px;
+  display: none;
+  overflow: hidden;
+  background-color: #f4f4f4;
+  border-radius: 0 0 5px 5px;
+}
+
+img.expandable {
+  width: 100%;
+  max-width: 300px;
+  margin: 10px auto;
+  cursor: pointer;
+  border-radius: 10px;
+  display: block;
+}
+
+#fullscreenImage {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+#fullscreenImage img {
+  max-width: 90%;
+  max-height: 90%;
+}
+
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">🏠 Home</a>
+    <a href="timetable.html">📘 Timetable</a>
+    <a href="notices.html">📢 Notices</a>
+    <a href="hodcup.html">⚽ HOD CUP</a>
+    <button class="toggle-btn" onclick="toggleDarkMode()">🌓</button>
+  </nav>  <div class="container">
+    <h1>Welcome to ND1 Computer Science Portal</h1>
+    <h2>Federal Polytechnic Nekede, P.M.B 1036 Owerri</h2><input type="text" id="search" placeholder="Search notices..." onkeyup="filterNotices()">
+
+<div id="notices">
+  <div class="notice">📘 PAY FOR COM122 TEXTBOOK<br><a href="https://paystack.shop/pay/com122" target="_blank">Payment Link</a></div>
+  <div class="notice">💳 GNS128 textbook – ₦2550 – OPay 7040904007 – Destiny</div>
+  <div class="notice">💳 GNS228 textbook – ₦2550 – GTB 0873882975 – Destiny</div>
+  <div class="notice">⚽ Upcoming HOD CUP - Don’t miss out!</div>
+</div>
+
+<div class="notice">THINGS TO BRING DURING COM125 (aka mr. Obiora)👇👇
+<div class="notice">-1. Testbook </div>
+<div class="notice">-2. 60 leaves / 2 blue pen  </div>
+<div class="notice">-3_. Whiteboard  marker </div>
+   <div class="notice">-4_handkerchief  </div>
+</div>
+<div class="notice"> RULES AND REGULATION FOR COM125 (MR Obiora) 👇👇
+  
+  <div class="notice">
+<div class="notice"> -Rules and regulations  </div>
+<div class="notice"> 1. No noise</div>
+<div class="notice"> 2. Don't enter>before him</div>
+<div class="notice"> 3. Put your phone on silent or switched off</div>
+<div class="notice"> 4. Don't sleep</div>
+<div class="notice"> 5. Make sure you are writing </div>
+
+<button class="collapsible">📝 Submit a New Update</button>
+<div class="content">
+  <form id="uploadForm" onsubmit="addNotice(event)">
+    <input type="text" id="noticeTitle" placeholder="Title" required>
+    <textarea id="noticeText" rows="3" placeholder="Enter the full notice text..." required></textarea>
+    <button type="submit">Post Update</button>
+  </form>
+</div>
+
+<button class="collapsible">📸 View HOD CUP Flyer</button>
+<div class="content">
+  <img src="hodflyer.jpg" alt="HODCUP Flyer" class="expandable" onclick="openFullscreen(this.src)">
+</div>
+
+  </div>  <footer style="text-align:center;padding:20px;background:#004080;color:white;">
+    &copy; 2025 ND1 Computer Science — Federal Polytechnic Nekede
+  </footer>  <div id="fullscreenImage" onclick="this.style.display='none'">
+    <img src="" alt="Expanded view">
+  </div>  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    function filterNotices() {
+      const keyword = document.getElementById("search").value.toLowerCase();
+      const notices = document.querySelectorAll(".notice");
+      notices.forEach(n => {
+        n.style.display = n.textContent.toLowerCase().includes(keyword) ? "block" : "none";
+      });
+    }
+
+    function addNotice(e) {
+      e.preventDefault();
+      const title = document.getElementById("noticeTitle").value;
+      const text = document.getElementById("noticeText").value;
+      const newNotice = document.createElement("div");
+      newNotice.className = "notice";
+      newNotice.innerHTML = `📌 <strong>${title}</strong><br>${text}`;
+      document.getElementById("notices").prepend(newNotice);
+      e.target.reset();
+    }
+
+    function openFullscreen(src) {
+      const full = document.getElementById("fullscreenImage");
+      full.style.display = "flex";
+      full.querySelector("img").src = src;
+    }
+
+    document.querySelectorAll(".collapsible").forEach(button => {
+      button.addEventListener("click", function () {
+        this.classList.toggle("active");
+        const content = this.nextElementSibling;
+        content.style.display = content.style.display === "block" ? "none" : "block";
+      });
+    });
+  </script></body>
+</html>

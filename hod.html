@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HOD CUP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    nav {
+      background-color: #004080;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #004080;
+      margin-bottom: 15px;
+    }
+
+    .note {
+      font-size: 18px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    img {
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .countdown {
+      font-size: 24px;
+      margin-top: 30px;
+      color: #d63333;
+    }
+
+    table {
+      width: 90%;
+      margin: 30px auto;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    th {
+      background-color: #004080;
+      color: white;
+    }
+
+    h3 {
+      margin-top: 40px;
+      color: #004080;
+    }
+
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .gallery img {
+      width: 160px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    footer {
+      margin-top: 50px;
+      background-color: #004080;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="timetable.html">Timetable</a>
+    <a href="notices.html">Notices</a>
+    <a href="hodcup.html">HOD CUP</a>
+  </nav>
+
+  <div class="container">
+    <!-- Main Section -->
+    <div class="title">⚽ HOD CUP 2025</div>
+    <p class="note">ND1 Computer Science is proudly participating in the upcoming HOD Cup. Come support your team!</p>
+    
+    <!-- Flyer -->
+    <img src="hodcup.jpg" alt="HOD CUP Flyer" />
+
+    <!-- Countdown -->
+    <div class="countdown" id="countdown">Loading countdown...</div>
+
+    <!-- Fixtures Table -->
+    <h3>📅 Match Fixtures</h3>
+    <table>
+      <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Team A</th>
+        <th>Team B</th>
+        <th>Venue</th>
+      </tr>
+      <tr>
+        <td>July 5</td>
+        <td>10:00 AM</td>
+        <td>ND1 Comp Sci</td>
+        <td>ND2 SLT</td>
+        <td>Main Field</td>
+      </tr>
+      <tr>
+        <td>July 7</td>
+        <td>2:00 PM</td>
+        <td>ND1 Comp Sci</td>
+        <td>ND1 Statistics</td>
+        <td>Campus Pitch</td>
+      </tr>
+      <tr>
+        <td>July 10</td>
+        <td>11:00 AM</td>
+        <td>ND1 Comp Sci</td>
+        <td>ND2 Comp Sci</td>
+        <td>Main Field</td>
+      </tr>
+    </table>
+
+    <!-- Gallery -->
+    <h3>📸 Match Day Gallery</h3>
+    <div class="gallery">
+      <img src="match1.jpg" alt="Match 1">
+      <img src="match2.jpg" alt="Match 2">
+      <img src="match3.jpg" alt="Match 3">
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2025 ND1 Computer Science - HOD CUP Events
+  </footer>
+
+  <!-- Countdown Script -->
+  <script>
+    const eventDate = new Date("2025-07-05T09:00:00").getTime();
+    const timer = setInterval(function () {
+      const now = new Date().getTime();
+      const diff = eventDate - now;
+
+      if (diff < 0) {
+        document.getElementById("countdown").innerHTML = "🏁 The HOD CUP has started!";
+        clearInterval(timer);
+      } else {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        document.getElementById("countdown").innerHTML = 
+          `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>
