@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Post Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    h2 {
+      text-align: center;
+    }
+    #preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .thumb {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h2>📤 Test Post Preview</h2>
+  <input type="file" id="media" multiple accept="image/*,video/*">
+  <div id="preview"></div>
+
+  <script>
+    const input = document.getElementById("media");
+    const preview = document.getElementById("preview");
+
+    input.addEventListener("change", () => {
+      preview.innerHTML = ""; // Clear previous
+      for (const file of input.files) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          let media;
+          if (file.type.startsWith("image/")) {
+            media = document.createElement("img");
+            media.className = "thumb";
+          } else if (file.type.startsWith("video/")) {
+            media = document.createElement("video");
+            media.controls = true;
+            media.className = "thumb";
+          }
+          media.src = reader.result;
+          preview.appendChild(media);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>

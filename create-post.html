@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Post</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+      margin: 0;
+    }
+    h2 {
+      text-align: center;
+      color: #004080;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    input, textarea, select, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #004080;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .thumb {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #004080;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      font-size: 28px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 100;
+    }
+    a.back-link {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #004080;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Create a New Post</h2>  <form id="postForm">
+    <textarea id="caption" placeholder="Write something... (optional)"></textarea>
+    <input type="file" id="media" multiple accept="image/*,video/*">
+    <select id="category">
+      <option value="school">🏫 School Life</option>
+      <option value="event">🎉 Events</option>
+      <option value="sport">⚽ Sports</option>
+      <option value="notice">📢 Notice</option>
+    </select>
+    <button type="submit">Post</button>
+    <div id="preview"></div>
+  </form><button class="floating-btn" onclick="document.getElementById('media').click()">+</button> <a class="back-link" href="gallery.html">← Back to Gallery</a>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, getDoc, doc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+    const imgbbKey = "88130daf8daf8e9d13508358ba9da175";
+
+    const form = document.getElementById("postForm");
+    const preview = document.getElementById("preview");
+    const mediaInput = document.getElementById("media");
+
+    let currentUser;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Please log in first.");
+        location.href = "auth.html";
+        return;
+      }
+      currentUser = user;
+
+      const profileSnap = await getDoc(doc(db, "users", user.uid));
+      if (!profileSnap.exists()) {
+        alert("Update your profile first.");
+        location.href = "profile.html";
+      }
+    });
+
+    mediaInput.addEventListener("change", () => {
+      preview.innerHTML = "";
+      for (const file of mediaInput.files) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const isImg = file.type.startsWith("image");
+          const isVid = file.type.startsWith("video");
+          const el = document.createElement(isImg ? "img" : "video");
+          el.src = reader.result;
+          el.className = "thumb";
+          if (isVid) el.controls = true;
+          preview.appendChild(el);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const caption = document.getElementById("caption").value;
+      const category = document.getElementById("category").value;
+
+      if (!mediaInput.files.length && !caption.trim()) {
+        return alert("Post must include text or media.");
+      }
+
+      const urls = [];
+
+      for (const file of mediaInput.files) {
+        const base64 = await toBase64(file);
+        const body = new FormData();
+        body.append("image", base64);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+          method: "POST",
+          body
+        });
+        const result = await res.json();
+        if (result.success) urls.push(result.data.url);
+      }
+
+      await addDoc(collection(db, "pendingUploads"), {
+        caption,
+        media: urls,
+        uploader: currentUser.uid,
+        category,
+        timestamp: serverTimestamp(),
+        likes: [],
+        dislikes: [],
+        comments: []
+      });
+
+      alert("Post submitted for approval.");
+      location.href = "gallery.html";
+    };
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+  </script></body>
+</html>
