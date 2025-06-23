@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Submit Event</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    .form-box {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input, textarea, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>Submit New Event</h2>
+    <input type="text" id="title" placeholder="Event Title" required />
+    <textarea id="details" placeholder="Event Description" rows="5" required></textarea>
+    <input type="date" id="date" required />
+    <input type="url" id="banner" placeholder="Banner Image URL (optional)" />
+    <button onclick="submitEvent()">Submit</button>
+    <p id="msg"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    window.submitEvent = async () => {
+      const title = document.getElementById("title").value.trim();
+      const details = document.getElementById("details").value.trim();
+      const date = document.getElementById("date").value;
+      const banner = document.getElementById("banner").value.trim();
+      const msg = document.getElementById("msg");
+
+      if (!title || !details || !date) {
+        msg.textContent = "All fields (except banner) are required.";
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "events"), {
+          title, details, date, banner, created: serverTimestamp()
+        });
+        msg.textContent = "✅ Event submitted!";
+        document.querySelector("form")?.reset();
+      } catch (e) {
+        msg.textContent = "❌ Failed to submit event.";
+        console.error(e);
+      }
+    };
+  </script>
+</body>
+</html>

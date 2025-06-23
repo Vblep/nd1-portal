@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upcoming Events</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 1em;
+    }
+    h1 {
+      text-align: center;
+      color: #004080;
+    }
+    .event-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      max-width: 700px;
+      overflow: hidden;
+      padding: 1em;
+    }
+    .event-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .event-title {
+      color: #004080;
+      margin-top: 0.5em;
+    }
+    .countdown {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #e53935;
+      margin-top: 10px;
+    }
+    .event-content {
+      margin-top: 1em;
+      line-height: 1.6;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>📅 Upcoming Events</h1>
+  <div id="eventsContainer"></div>  <script>
+    const events = [
+      {
+        id: 'event1',
+        title: "🎓 One Day Campus Business Symposium",
+        image: "https://i.postimg.cc/1tmt5gcg/IMG-20250620-WA0079.jpg",
+        date: "2025-07-03T10:00:00",
+        content: `
+          <strong>FROM THE OFFICE OF THE SUG TREASURER</strong><br>
+          STUDENTS' UNION GOVERNMENT (LIBERATION HEADQUARTERS)<br>
+          FEDERAL POLYTECHNIC NEKEDE, OWERRI<br><br>
+          <strong>ALUTA TRIUMPHANT 2024/2025 ACADEMIC SESSION</strong><br><br>
+          <strong>PRESENTS A ONE DAY CAMPUS BUSINESS SYMPOSIUM</strong><br>
+          <strong>Theme:</strong> Transformation Through Digital Leverage: Empowering Financial Freedom<br><br>
+          <ul>
+            <li>Keynote Addresses by Financial Experts & Scholars</li>
+            <li>Panel Discussion</li>
+            <li>Interactive Session</li>
+            <li>Business Start-up & Grant Opportunities</li>
+            <li>Stage Performances & Entertainment</li>
+            <li>Freebies for early students</li>
+          </ul>
+          For Sponsorship & Enquiries: 📞 09033899672<br><br>
+          <strong>SIGNED:</strong><br>
+          COMR. BARR. CHUKWUEMEKA CHRISTIANA I. — SUG TREASURER<br>
+          ANNOUNCED BY: COMR. IHEJIRIKA DAVID OGOCHUKWU — NACOS TREASURER
+        `
+      }
+    ];
+
+    const container = document.getElementById("eventsContainer");
+    const now = new Date();
+
+    events.forEach(event => {
+      const eventDate = new Date(event.date);
+      if (eventDate > now) {
+        const card = document.createElement("div");
+        card.className = "event-card";
+        card.innerHTML = `
+          <img src="${event.image}" alt="Event banner">
+          <h2 class="event-title">${event.title}</h2>
+          <div class="countdown" id="cd-${event.id}"></div>
+          <div class="event-content">${event.content}</div>
+        `;
+        container.appendChild(card);
+        startCountdown(event.id, eventDate);
+      }
+    });
+
+    function startCountdown(id, date) {
+      const countdownEl = document.getElementById(`cd-${id}`);
+      const timer = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = date.getTime() - now;
+
+        if (distance < 0) {
+          clearInterval(timer);
+          countdownEl.innerHTML = "⏰ Event expired";
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        countdownEl.innerHTML = `⏳ Starts in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }, 1000);
+    }
+  </script></body>
+</html>

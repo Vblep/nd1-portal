@@ -1,201 +1,268 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>HOD CUP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#004080" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ND1 Computer Science Portal</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
+      background: url('220px-FEDERAL_POLYTECHNIC_NEKEDE_OWERRI_front_gate-3273502588.png') no-repeat center center fixed;
+      background-size: cover;
     }
-
-    nav {
-      background-color: #004080;
-      padding: 10px;
+    header {
       text-align: center;
-    }
-
-    nav a {
+      padding: 20px 0;
+      background-color: rgba(0, 64, 128, 0.85);
       color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
     }
-
-    nav a:hover {
+    header img {
+      width: 80px;
+    }
+    nav {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .menu {
+      background-color: rgba(0, 64, 128, 0.9);
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 20px;
+    }
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      margin-top: 10px;
+      background-color: white;
+      min-width: 180px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      z-index: 1;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .dropdown a {
+      color: #004080;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown a:hover {
+      background-color: #eee;
+    }
+    .welcome {
+      background-color: rgba(0,0,0,0.3);
+      margin: 50px auto;
+      max-width: 600px;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      color:white;
+    }
+    .admin-panel {
+      display: none;
+      text-align: center;
+      margin: 20px auto;
+      padding: 10px;
+      max-width: 300px;
+      background: rgba(0,64,128,0.8);
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .admin-panel a {
+      color: #ffff66;
       text-decoration: underline;
     }
-
-    .container {
-      padding: 20px;
-      text-align: center;
-    }
-
-    .title {
-      font-size: 26px;
-      font-weight: bold;
-      color: #004080;
-      margin-bottom: 15px;
-    }
-
-    .note {
-      font-size: 18px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-    }
-
-    img {
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-
-    .countdown {
-      font-size: 24px;
-      margin-top: 30px;
-      color: #d63333;
-    }
-
-    table {
-      width: 90%;
-      margin: 30px auto;
-      border-collapse: collapse;
-      background-color: white;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-
-    th {
-      background-color: #004080;
+    .toast {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #004080;
       color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
     }
-
-    h3 {
-      margin-top: 40px;
-      color: #004080;
-    }
-
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .gallery img {
-      width: 160px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
     footer {
-      margin-top: 50px;
+      text-align: center;
       background-color: #004080;
       color: white;
-      padding: 10px;
-      text-align: center;
+      padding: 15px 0;
+    }
+    #notificationIcon {
+      position: absolute;
+      top: 20px;
+      right: 60px;
+      font-size: 22px;
+      color: yellow;
+      cursor: pointer;
+    }
+    #notificationPanel {
+      display: none;
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      width: 90%;
+      max-width: 300px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
+  <header>
+    <img src="220px-FEDERAL_POLYTECHNIC_NEKEDE_OWERRI_front_gate-3273502588.png" alt="School Logo">
+    <h1>FEDERAL POLYTECHNIC NEKEDE</h1>
+    <p>P.M.B 1036 OWERRI</p>
+    <div id="notificationIcon" onclick="toggleNotifications()">🔔</div>
+  </header>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="timetable.html">Timetable</a>
-    <a href="notices.html">Notices</a>
-    <a href="hodcup.html">HOD CUP</a>
-  </nav>
-
-  <div class="container">
-    <!-- Main Section -->
-    <div class="title">⚽ HOD CUP 2025</div>
-    <p class="note">ND1 Computer Science is proudly participating in the upcoming HOD Cup. Come support your team!</p>
-    
-    <!-- Flyer -->
-    <img src="hodcup.jpg" alt="HOD CUP Flyer" />
-
-    <!-- Countdown -->
-    <div class="countdown" id="countdown">Loading countdown...</div>
-
-    <!-- Fixtures Table -->
-    <h3>📅 Match Fixtures</h3>
-    <table>
-      <tr>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Team A</th>
-        <th>Team B</th>
-        <th>Venue</th>
-      </tr>
-      <tr>
-        <td>July 5</td>
-        <td>10:00 AM</td>
-        <td>ND1 Comp Sci</td>
-        <td>ND2 SLT</td>
-        <td>Main Field</td>
-      </tr>
-      <tr>
-        <td>July 7</td>
-        <td>2:00 PM</td>
-        <td>ND1 Comp Sci</td>
-        <td>ND1 Statistics</td>
-        <td>Campus Pitch</td>
-      </tr>
-      <tr>
-        <td>July 10</td>
-        <td>11:00 AM</td>
-        <td>ND1 Comp Sci</td>
-        <td>ND2 Comp Sci</td>
-        <td>Main Field</td>
-      </tr>
-    </table>
-
-    <!-- Gallery -->
-    <h3>📸 Match Day Gallery</h3>
-    <div class="gallery">
-      <img src="match1.jpg" alt="Match 1">
-      <img src="match2.jpg" alt="Match 2">
-      <img src="match3.jpg" alt="Match 3">
+    <button class="menu" onclick="toggleMenu()">☰</button>
+    <div class="dropdown" id="dropdown">
+      <a href="timetable.html">📘 Timetable</a>
+      <a href="notices.html">📢 Notices</a>
+      <a href="hod.html">⚽ Meet HOD</a>
+      <a href="reps.html">👥 Course Reps</a>
+      <a href="trending.html">🔥 Trending Gists</a>
+      <a href="gallery.html">🖼️ Gallery</a>
+      <a href="forum.html">💬 Student Forum</a>
+      <a href="polls.html">🗳️ Vote</a>
+      <a href="moments.html">📷 My Moments</a>
+      <a href="leaderboard.html">🏆 Leaderboard</a>
+      <a href="suggestions.html">📩 Suggestion Box</a>
+      <a href="users.html">🔍 View Profiles</a>
+      <a href="view-profile.html" style="text-decoration: none; padding: 0.5em 1em; background: #007bff; color: white; border-radius: 5px;">👤 View Profile</a>
+      <a href="approve.html" id="approveLink">✅ Approve Photos</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
     </div>
+  </nav>
+  <div id="notificationPanel">Loading notifications...</div>
+  <div class="welcome">
+    <h2>Welcome to ND1 Computer Science Portal</h2>
+    <p>Check your timetable, view course reps, read school notices, meet the HOD, and catch trending gists.</p>
   </div>
-
-  <!-- Footer -->
+  <div class="admin-panel" id="adminPanel">
+    🔒 <strong>Admin Access:</strong> <a href="approve.html">Go to Admin Panel</a>
+  </div>
+  <div class="toast" id="adminToast">✅ You are logged in as Admin</div>
   <footer>
-    &copy; 2025 ND1 Computer Science - HOD CUP Events
-  </footer>
+    <p>&copy; 2025 ND1 Computer Science Portal</p>
+    <p>Phone: <a href="tel:08135793038" style="color: white;">08135793038</a></p>
+    <p>WhatsApp: <a href="https://wa.me/2349119012234" style="color: white;" target="_blank">09119012234</a></p>
+    <p>Email: <a href="mailto:ebuvick0@gmail.com" style="color: white;">ebuvick0@gmail.com</a></p>
+    <p>@developers: Victor, Goodluck, Chukwuma, Bukar</p>
+  </footer>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <!-- Countdown Script -->
-  <script>
-    const eventDate = new Date("2025-07-05T09:00:00").getTime();
-    const timer = setInterval(function () {
-      const now = new Date().getTime();
-      const diff = eventDate - now;
+    const firebaseConfig = {
+      apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
+      authDomain: "nd1portal.firebaseapp.com",
+      projectId: "nd1portal",
+      storageBucket: "nd1portal.appspot.com",
+      messagingSenderId: "428976722721",
+      appId: "1:428976722721:web:d15b86d70275ae30dda460",
+      measurementId: "G-RB3BCSZ5VM"
+    };
 
-      if (diff < 0) {
-        document.getElementById("countdown").innerHTML = "🏁 The HOD CUP has started!";
-        clearInterval(timer);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "auth.html";
+      } else if (user.email === "ebuvick0@gmail.com") {
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("approveLink").style.display = "block";
+        const toast = document.getElementById("adminToast");
+        toast.style.display = "block";
+        setTimeout(() => toast.style.display = "none", 4000);
       } else {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        document.getElementById("countdown").innerHTML = 
-          `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+        document.getElementById("approveLink").style.display = "none";
       }
-    }, 1000);
-  </script>
+    });
 
-</body>
+    let visibilityTimer;
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        visibilityTimer = setTimeout(() => {
+          auth.signOut().then(() => {
+            window.location.href = "auth.html";
+          });
+        }, 5 * 60 * 1000);
+      } else {
+        clearTimeout(visibilityTimer);
+      }
+    });
+
+    let logoutTimer;
+    function resetLogoutTimer() {
+      clearTimeout(logoutTimer);
+      logoutTimer = setTimeout(() => {
+        auth.signOut().then(() => {
+          window.location.href = "auth.html";
+        });
+      }, 10 * 60 * 1000);
+    }
+    document.addEventListener("mousemove", resetLogoutTimer);
+    document.addEventListener("keydown", resetLogoutTimer);
+    resetLogoutTimer();
+
+    window.logout = function () {
+      signOut(auth).then(() => {
+        window.location.href = "auth.html";
+      });
+    };
+
+    window.toggleMenu = function () {
+      const menu = document.getElementById("dropdown");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    };
+
+    window.toggleNotifications = async function () {
+      const panel = document.getElementById("notificationPanel");
+      panel.style.display = panel.style.display === "block" ? "none" : "block";
+      panel.innerHTML = "<p>Loading notifications...</p>";
+      const snap = await getDocs(collection(db, "users/" + auth.currentUser.uid + "/notifications"));
+      panel.innerHTML = "";
+      snap.forEach(doc => {
+        const n = doc.data();
+        panel.innerHTML += `<div style='padding: 5px 0;'>📢 ${n.message}</div>`;
+      });
+    };
+
+    document.addEventListener("click", function (event) {
+      const dropdown = document.getElementById("dropdown");
+      const button = document.querySelector(".menu");
+      if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  </script>  <script type="text/javascript">
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function(){
+      var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = 'https://embed.tawk.to/6855a1975f6b801911a740c2/1iu77uek1';
+      s1.charset = 'UTF-8';
+      s1.setAttribute('crossorigin', '*');
+      s0.parentNode.insertBefore(s1, s0);
+    })();
+  </script></body>
 </html>
