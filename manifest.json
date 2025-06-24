@@ -1,9 +1,9 @@
 {
-  "name": "ND1 Portal",
+  "name": "ND1 Computer Science Portal",
   "short_name": "ND1 Portal",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#004080",
   "theme_color": "#004080",
   "icons": [
     {

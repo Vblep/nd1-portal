@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -97,33 +96,30 @@
     <div class="tab-buttons">
       <button id="loginTab" class="active" onclick="switchTab('login')">Login</button>
       <button id="registerTab" onclick="switchTab('register')">Register</button>
-    </div>
-
-    <form id="loginForm" class="active">
-      <input type="email" id="loginEmail" placeholder="Email" required />
-      <div class="password-wrapper">
-        <input type="password" id="loginPassword" placeholder="Password" required />
-        <span class="toggle-password" onclick="togglePassword('loginPassword')">👁️</span>
-      </div>
-      <div class="forgot"><a href="#" onclick="resetPassword()">Forgot Password?</a></div>
-      <div class="error" id="loginError"></div>
-      <button type="submit">Login</button>
-    </form>
-
-    <form id="registerForm">
-      <input type="email" id="registerEmail" placeholder="Email" required />
-      <div class="password-wrapper">
-        <input type="password" id="registerPassword" placeholder="Password" required />
-        <span class="toggle-password" onclick="togglePassword('registerPassword')">👁️</span>
-      </div>
-      <div class="error" id="registerError"></div>
-      <button type="submit">Register</button>
-    </form>
+    </div><form id="loginForm" class="active">
+  <input type="email" id="loginEmail" placeholder="Email" required />
+  <div class="password-wrapper">
+    <input type="password" id="loginPassword" placeholder="Password" required />
+    <span class="toggle-password" onclick="togglePassword('loginPassword')">👁️</span>
   </div>
+  <div class="forgot"><a href="#" onclick="resetPassword()">Forgot Password?</a></div>
+  <div class="error" id="loginError"></div>
+  <button type="submit">Login</button>
+</form>
 
-  <script type="module">
+<form id="registerForm">
+  <input type="email" id="registerEmail" placeholder="Email" required />
+  <div class="password-wrapper">
+    <input type="password" id="registerPassword" placeholder="Password" required />
+    <span class="toggle-password" onclick="togglePassword('registerPassword')">👁️</span>
+  </div>
+  <div class="error" id="registerError"></div>
+  <button type="submit">Register</button>
+</form>
+
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDkMtk-2mYbg_wEzSHRJ--z8NeQYfIWesQ",
@@ -137,19 +133,16 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // ✅ If user is already logged in, redirect to homepage
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "index.html";
-      }
-    });
-
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = loginEmail.value.trim();
       const password = loginPassword.value.trim();
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        if (!userCred.user.emailVerified) {
+          loginError.textContent = "Please verify your email before logging in.";
+          return;
+        }
         window.location.href = "index.html";
       } catch (error) {
         loginError.textContent = error.message;
@@ -161,14 +154,12 @@
       const email = registerEmail.value.trim();
       const password = registerPassword.value.trim();
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        window.location.href = "username.html";
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCred.user);
+        alert("Registration successful. A verification email has been sent to your inbox.");
+        window.location.href = "auth.html";
       } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-          registerError.textContent = "Email already registered. Please login.";
-        } else {
-          registerError.textContent = error.message;
-        }
+        registerError.textContent = error.message;
       }
     });
 
@@ -203,6 +194,5 @@
       const input = document.getElementById(id);
       input.type = input.type === "password" ? "text" : "password";
     };
-  </script>
-</body>
+  </script></body>
 </html>
